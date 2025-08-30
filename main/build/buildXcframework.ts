@@ -67,12 +67,73 @@ function stripAllBinaries(xcframeworkPath: string, frameworkName: string) {
     }
 }
 
-async function main() {
+// Resilient version resolution with retry/backoff and local fallback
+async function sleep(ms: number) { return new Promise<void>(r => setTimeout(r, ms)); }
+
+function parseVersion(input: string): { major: number; minor: number; patch: number } | null {
+    const m = input.match(/v?(\d+)\.(\d+)\.(\d+)/);
+    if (!m) return null;
+    return { major: Number(m[1]), minor: Number(m[2]), patch: Number(m[3]) };
+}
+
+function bumpPatch(version: string): string {
+    const parsed = parseVersion(version) || { major: 0, minor: 0, patch: 0 };
+    return `v${parsed.major}.${parsed.minor}.${parsed.patch + 1}`;
+}
+
+function readExistingVersion(packagePath: string): string | null {
+    try {
+        const pkgPath = `${packagePath}/Package.swift`;
+        if (!existsSync(pkgPath)) return null;
+        const text = readFileSync(pkgPath, "utf8");
+        const m = text.match(/v\d+\.\d+\.\d+/);
+        return m ? m[0] : null;
+    } catch (_) {
+        return null;
+    }
+}
+
+async function resolveVersion(swift: boolean, isPro: boolean, packagePath: string): Promise<string> {
+    // 1) Explicit override
+    if (process.env.CCXT_VERSION && parseVersion(process.env.CCXT_VERSION)) {
+        return process.env.CCXT_VERSION as string;
+    }
+
+    // 2) Retry bumpVersion
+    const attempts = Number(process.env.GH_FETCH_RETRIES || 4);
+    const baseDelay = Number(process.env.GH_FETCH_RETRY_DELAY_MS || 500);
+    for (let i = 1; i <= attempts; i++) {
+        try {
+            return await bumpVersion(swift, isPro);
+        } catch (e: any) {
+            const message = e?.message || String(e);
+            if (i === attempts) {
+                console.warn(`bumpVersion failed after ${attempts} attempts: ${message}`);
+                break;
+            }
+            const jitter = Math.floor(Math.random() * 250);
+            const delay = baseDelay * Math.pow(2, i - 1) + jitter;
+            console.warn(`bumpVersion failed (attempt ${i}/${attempts}): ${message}. Retrying in ${delay}ms...`);
+            await sleep(delay);
+        }
+    }
+
+    // 3) Fallback to existing Package.swift version, bump patch
+    const existing = readExistingVersion(packagePath);
+    if (existing) {
+        return bumpPatch(existing);
+    }
+
+    // 4) Last resort default
+    return "v0.0.1";
+}
+
+async function main(binaries: {[key: string]: string}) {
 
     gomobileInit();
 
-    for (const packageType of Object.keys(swiftBinaries)) {
-        const packagePath = swiftBinaries[packageType];
+    for (const packageType of Object.keys(binaries)) {
+        const packagePath = binaries[packageType];
         const outputDir = `${packagePath}/Sources/CCXTCore`;
         const framework = `CCXTCore.xcframework`;
 
@@ -97,7 +158,7 @@ async function main() {
         // Zip with deterministic options using ditto (preserves symlinks, avoids bloat)
         runCommand(`ditto -c -k --sequesterRsrc --keepParent "${outputDir}/${framework}" "${outputDir}/${framework}.zip"`);
         const checksum = runCommand(`swift package compute-checksum ${outputDir}/${framework}.zip`);
-        const version = await bumpVersion(true, (packageType === 'pro'));
+        const version = await resolveVersion(true, (packageType === 'pro'), packagePath);
 
         createGeneratedFile (
             `${packagePath}/Package.swift`,
@@ -122,4 +183,12 @@ async function main() {
     }
 }
 
-main();
+const args = process.argv.slice(2);
+if (args.includes ('--pro')) {
+    main ({'pro': swiftBinaries.pro});
+} else if (args.includes('--rest')) {
+    main ({'rest': swiftBinaries.rest});
+} else {
+    main (swiftBinaries);
+}
+

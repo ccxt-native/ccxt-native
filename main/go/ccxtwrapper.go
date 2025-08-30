@@ -7,6 +7,7 @@ import (
 	"math"
 	"regexp"
 	"strings"
+	"sync"
 	[imports]
 )
 type CCXTGoExchange struct {
@@ -64,15 +65,17 @@ func sanitise(v interface{}) interface{} {
 		}
 		return x
 	case map[string]interface{}:
+		out := make(map[string]interface{}, len(x))
 		for k, vv := range x {
-			x[k] = sanitise(vv)
+			out[k] = sanitise(vv)
 		}
-		return x
+		return out
 	case []interface{}:
+		out := make([]interface{}, len(x))
 		for i, vv := range x {
-			x[i] = sanitise(vv)
+			out[i] = sanitise(vv)
 		}
-		return x
+		return out
 	default:
 		return v
 	}

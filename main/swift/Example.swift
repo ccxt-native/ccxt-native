@@ -12,7 +12,7 @@ struct ContentView: View {
     private var configJson = [
         "apiKey": "",
         "secret": "",
-        "password": ""
+        // "password": ""
     ]
 
     private var orderId = "1"
@@ -23,7 +23,15 @@ struct ContentView: View {
     private var xrpPrice = 2.0591
 
     init () {
-        self.exchange = Bitget(config: configJson)!
+        self.exchange = Binance(config: configJson)!
+        self.setup()
+    }
+    
+    func setup () {
+        Task {
+            try? self.exchange.setSandboxMode(enabled: true)
+            try? await self.exchange.loadMarkets()
+        }
     }
 
     var body: some View {
@@ -266,11 +274,11 @@ struct ContentView: View {
                             await fetchDepositWithdrawFee()
                         }
                     }
-                    Button("fetchDepositWithdrawFees"){
-                        Task {
-                            await fetchDepositWithdrawFees()
-                        }
-                    }
+                    // Button("fetchDepositWithdrawFees"){
+                    //     Task {
+                    //         await fetchDepositWithdrawFees()
+                    //     }
+                    // }
                     Button("fetchFundingHistory"){
                         Task {
                             await fetchFundingHistory()
@@ -496,6 +504,11 @@ struct ContentView: View {
                             await watchOrderBook()
                         }
                     }
+                    Button("unWatchOrderBook"){
+                        Task {
+                            await unWatchOrderBook()
+                        }
+                    }
                     Button("watchBidsAsks"){
                         Task {
                             await watchBidsAsks()
@@ -511,6 +524,11 @@ struct ContentView: View {
                             await watchOrders()
                         }
                     }
+                    Button("unWatchOrders"){
+                        Task {
+                            await unWatchOrders()
+                        }
+                    }
                     Button("watchPositions"){
                         Task {
                             await watchPositions()
@@ -521,6 +539,11 @@ struct ContentView: View {
                             await watchTicker()
                         }
                     }
+                    // Button("unWatchTicker"){
+                    //     Task {
+                    //         await unWatchTicker()
+                    //     }
+                    // }
                     Button("watchTickers"){
                         Task {
                             await watchTickers()
@@ -531,14 +554,379 @@ struct ContentView: View {
                             await watchTrades()
                         }
                     }
+                    Button("unWatchTrades"){
+                        Task {
+                            await unWatchTrades()
+                        }
+                    }
                     Button("watchTradesForSymbols"){
                         Task {
                             await watchTradesForSymbols()
                         }
                     }
-                    Button("withdraw"){
+                    Button("withdraw (WARNING: Actually withdraws 0.0001 LTC)"){
                         Task {
                             await withdraw()
+                        }
+                    }
+                    Button("getAccountsById"){
+                        Task {
+                            getAccountsById()
+                        }
+                    }
+                    Button("getAlias"){
+                        Task {
+                            getAlias()
+                        }
+                    }
+                    Button("getApi"){
+                        Task {
+                            getApi()
+                        }
+                    }
+                    Button("getBalance"){
+                        Task {
+                            getBalance()
+                        }
+                    }
+                    Button("getBaseCurrencies"){
+                        Task {
+                            getBaseCurrencies()
+                        }
+                    }
+                    Button("getBidsasks"){
+                        Task {
+                            getBidsasks()
+                        }
+                    }
+                    Button("getClients"){
+                        Task {
+                            getClients()
+                        }
+                    }
+                    Button("getCodes"){
+                        Task {
+                            getCodes()
+                        }
+                    }
+                    Button("getCommonCurrencies"){
+                        Task {
+                            getCommonCurrencies()
+                        }
+                    }
+                    Button("getCurrencies_by_id"){
+                        Task {
+                            getCurrencies_by_id()
+                        }
+                    }
+                    Button("getCurrencies"){
+                        Task {
+                            getCurrencies()
+                        }
+                    }
+                    Button("getExceptions"){
+                        Task {
+                            getExceptions()
+                        }
+                    }
+                    Button("getFeatures"){
+                        Task {
+                            getFeatures()
+                        }
+                    }
+                    Button("getFees"){
+                        Task {
+                            getFees()
+                        }
+                    }
+                    Button("getFundingRates"){
+                        Task {
+                            getFundingRates()
+                        }
+                    }
+                    Button("getHas"){
+                        Task {
+                            getHas()
+                        }
+                    }
+                    Button("getHostname"){
+                        Task {
+                            getHostname()
+                        }
+                    }
+                    Button("getHttpExceptions"){
+                        Task {
+                            getHttpExceptions()
+                        }
+                    }
+                    Button("getHttpProxyAgentModule"){
+                        Task {
+                            getHttpProxyAgentModule()
+                        }
+                    }
+                    Button("getHttpsProxyAgentModule"){
+                        Task {
+                            getHttpsProxyAgentModule()
+                        }
+                    }
+                    Button("getId"){
+                        Task {
+                            getId()
+                        }
+                    }
+                    Button("getIds"){
+                        Task {
+                            getIds()
+                        }
+                    }
+                    Button("getIsSandboxModeEnabled"){
+                        Task {
+                            getIsSandboxModeEnabled()
+                        }
+                    }
+                    Button("getLast_http_response"){
+                        Task {
+                            getLast_http_response()
+                        }
+                    }
+                    Button("getLast_request_body"){
+                        Task {
+                            getLast_request_body()
+                        }
+                    }
+                    Button("getLast_request_headers"){
+                        Task {
+                            getLast_request_headers()
+                        }
+                    }
+                    Button("getLast_request_url"){
+                        Task {
+                            getLast_request_url()
+                        }
+                    }
+                    Button("getLimits"){
+                        Task {
+                            getLimits()
+                        }
+                    }
+                    Button("getLiquidations"){
+                        Task {
+                            getLiquidations()
+                        }
+                    }
+                    Button("getLogin"){
+                        Task {
+                            getLogin()
+                        }
+                    }
+                    Button("getMarkets_by_id"){
+                        Task {
+                            getMarkets_by_id()
+                        }
+                    }
+                    Button("getMarkets"){
+                        Task {
+                            getMarkets()
+                        }
+                    }
+                    Button("getMAX_VALUE"){
+                        Task {
+                            getMAX_VALUE()
+                        }
+                    }
+                    Button("getMyLiquidations"){
+                        Task {
+                            getMyLiquidations()
+                        }
+                    }
+                    Button("getMyTrades"){
+                        Task {
+                            getMyTrades()
+                        }
+                    }
+                    Button("getName"){
+                        Task {
+                            getName()
+                        }
+                    }
+                    Button("getNewUpdates"){
+                        Task {
+                            getNewUpdates()
+                        }
+                    }
+                    Button("getOhlcvs"){
+                        Task {
+                            getOhlcvs()
+                        }
+                    }
+                    Button("getOptions"){
+                        Task {
+                            getOptions()
+                        }
+                    }
+                    Button("getOrderbooks"){
+                        Task {
+                            getOrderbooks()
+                        }
+                    }
+                    Button("getOrders"){
+                        Task {
+                            getOrders()
+                        }
+                    }
+                    Button("getPositions"){
+                        Task {
+                            getPositions()
+                        }
+                    }
+                    Button("getPrecision"){
+                        Task {
+                            getPrecision()
+                        }
+                    }
+                    Button("getProxyDictionaries"){
+                        Task {
+                            getProxyDictionaries()
+                        }
+                    }
+                    Button("getQuoteCurrencies"){
+                        Task {
+                            getQuoteCurrencies()
+                        }
+                    }
+                    Button("getRateLimit"){
+                        Task {
+                            getRateLimit()
+                        }
+                    }
+                    Button("getReduceFees"){
+                        Task {
+                            getReduceFees()
+                        }
+                    }
+                    Button("getRequiredCredentials"){
+                        Task {
+                            getRequiredCredentials()
+                        }
+                    }
+                    Button("getReturnResponseHeaders"){
+                        Task {
+                            getReturnResponseHeaders()
+                        }
+                    }
+                    Button("getSocksProxyAgentModule"){
+                        Task {
+                            getSocksProxyAgentModule()
+                        }
+                    }
+                    Button("getSocksProxyAgentModuleChecked"){
+                        Task {
+                            getSocksProxyAgentModuleChecked()
+                        }
+                    }
+                    Button("getSubstituteCommonCurrencyCodes"){
+                        Task {
+                            getSubstituteCommonCurrencyCodes()
+                        }
+                    }
+                    Button("getSymbols"){
+                        Task {
+                            getSymbols()
+                        }
+                    }
+                    Button("getThrottler"){
+                        Task {
+                            getThrottler()
+                        }
+                    }
+                    Button("getTickers"){
+                        Task {
+                            getTickers()
+                        }
+                    }
+                    Button("getTimeframes"){
+                        Task {
+                            getTimeframes()
+                        }
+                    }
+                    Button("getToken"){
+                        Task {
+                            getToken()
+                        }
+                    }
+                    Button("getTokenBucket"){
+                        Task {
+                            getTokenBucket()
+                        }
+                    }
+                    Button("getTrades"){
+                        Task {
+                            getTrades()
+                        }
+                    }
+                    Button("getTransactions"){
+                        Task {
+                            getTransactions()
+                        }
+                    }
+                    Button("getTriggerOrders"){
+                        Task {
+                            getTriggerOrders()
+                        }
+                    }
+                    Button("getUrls"){
+                        Task {
+                            getUrls()
+                        }
+                    }
+                    Button("getUserAgent"){
+                        Task {
+                            getUserAgent()
+                        }
+                    }
+                    Button("getUserAgents"){
+                        Task {
+                            getUserAgents()
+                        }
+                    }
+                    Button("getVersion"){
+                        Task {
+                            getVersion()
+                        }
+                    }
+                    Button("setApiKey"){
+                        Task {
+                            setApiKey()
+                        }
+                    }
+                    Button("setSecret"){
+                        Task {
+                            setSecret()
+                        }
+                    }
+                    Button("setTimeout"){
+                        Task {
+                            setTimeout()
+                        }
+                    }
+                    Button("setTwofa"){
+                        Task {
+                            setTwofa()
+                        }
+                    }
+                    Button("setUid"){
+                        Task {
+                            setUid()
+                        }
+                    }
+                    Button("setVerbose"){
+                        Task {
+                            setVerbose()
+                        }
+                    }
+                    Button("setWalletAddress"){
+                        Task {
+                            setWalletAddress()
                         }
                     }
                     //                Button("createConvertTrade"){
@@ -551,12 +939,7 @@ struct ContentView: View {
                     //                        await fetchMarkPrice()
                     //                    }
                     //                }
-                    Button("testRateLimiter"){
-                        Task {
-                            try await testRateLimiter()
-                        }
-                    }
-                }.frame(maxHeight: geometry.size.height)
+                }.frame(maxWidth: geometry.size.width, maxHeight: geometry.size.height)
                     .padding()
             }
         }
@@ -575,7 +958,7 @@ struct ContentView: View {
 
     func fetchTickers() async {
         do {
-            let tickers = try await self.exchange.fetchTickers(symbols: ["XRP/USDT", "BTC/USDT"])
+            let tickers = try await self.exchange.fetchTickers(symbols: [futuresSymbol, futuresSymbol])
             print(tickers)
         } catch {
             print(error.localizedDescription)
@@ -595,7 +978,7 @@ struct ContentView: View {
         do {
             let request = try await self.exchange.setLeverage(
                 leverage: 10,
-                symbol: "XRP/USDT:USDT",
+                symbol: futuresSymbol,
             )
             print(request)
         } catch {
@@ -606,7 +989,7 @@ struct ContentView: View {
     func createOrder() async {
         do {
             let order = try await self.exchange.createOrder(
-                symbol: "XRP/USDT:USDT",
+                symbol: futuresSymbol,
                 type: "limit",
                 side: "buy",
                 amount: 5,
@@ -621,7 +1004,7 @@ struct ContentView: View {
 
     func addMargin() async {
          do {
-             let response = try await self.exchange.addMargin(symbol: "XRP/USDT:USDT", amount: 1)
+             let response = try await self.exchange.addMargin(symbol: futuresSymbol, amount: 1)
              print(response)
          } catch {
              print(error.localizedDescription)
@@ -637,7 +1020,7 @@ struct ContentView: View {
     }
     func borrowIsolatedMargin() async {
          do {
-             let response = try await self.exchange.borrowIsolatedMargin(symbol: "XRP/USDT", code: "USDT", amount: 1)
+             let response = try await self.exchange.borrowIsolatedMargin(symbol: futuresSymbol, code: "USDT", amount: 1)
              print(response)
          } catch {
              print(error.localizedDescription)
@@ -710,7 +1093,7 @@ struct ContentView: View {
     }
     func closePosition() async {
          do {
-             let response = try await self.exchange.closePosition(symbol: "XRP/USDT:USDT")
+             let response = try await self.exchange.closePosition(symbol: futuresSymbol)
              print(response)
          } catch {
              print(error.localizedDescription)
@@ -718,7 +1101,7 @@ struct ContentView: View {
     }
     func createLimitOrder() async {
          do {
-             let response = try await self.exchange.createLimitOrder(symbol: "XRP/USDT:USDT", side: "buy", amount: 1, price: xrpPrice)
+             let response = try await self.exchange.createLimitOrder(symbol: futuresSymbol, side: "buy", amount: 1, price: xrpPrice)
              print(response)
          } catch {
              print(error.localizedDescription)
@@ -726,7 +1109,7 @@ struct ContentView: View {
     }
     func createMarketBuyOrderWithCost() async {
          do {
-             let response = try await self.exchange.createMarketBuyOrderWithCost(symbol: "XRP/USDT:USDT", cost: 2)
+             let response = try await self.exchange.createMarketBuyOrderWithCost(symbol: futuresSymbol, cost: 2)
              print(response)
          } catch {
              print(error.localizedDescription)
@@ -734,7 +1117,7 @@ struct ContentView: View {
     }
     func createMarketOrder() async {
          do {
-             let response = try await self.exchange.createMarketOrder(symbol: "XRP/USDT:USDT", side: "buy", amount: 1)
+             let response = try await self.exchange.createMarketOrder(symbol: futuresSymbol, side: "buy", amount: 1)
              print(response)
          } catch {
              print(error.localizedDescription)
@@ -862,7 +1245,7 @@ struct ContentView: View {
     }
     func fetchClosedOrders() async {
          do {
-             let response = try await self.exchange.fetchClosedOrders(symbol: "XRP/USDT:USDT")
+             let response = try await self.exchange.fetchClosedOrders(symbol: futuresSymbol)
              print(response)
          } catch {
              print(error.localizedDescription)
@@ -940,17 +1323,17 @@ struct ContentView: View {
              print(error.localizedDescription)
          }
     }
-    func fetchDepositWithdrawFees() async {
-         do {
-             let response = try await self.exchange.fetchDepositWithdrawFees(codes: ["XRP"])
-             print(response)
-         } catch {
-             print(error.localizedDescription)
-         }
-    }
+    // func fetchDepositWithdrawFees() async {
+    //      do {
+    //          let response = try await self.exchange.fetchDepositWithdrawFees(codes: ["XRP"])
+    //          print(response)
+    //      } catch {
+    //          print(error.localizedDescription)
+    //      }
+    // }
     func fetchFundingHistory() async {
          do {
-             let response = try await self.exchange.fetchFundingHistory(symbol: "XRP/USDT:USDT")
+             let response = try await self.exchange.fetchFundingHistory(symbol: futuresSymbol)
              print(response)
          } catch {
              print(error.localizedDescription)
@@ -958,7 +1341,7 @@ struct ContentView: View {
     }
     func fetchFundingRate() async {
          do {
-             let response = try await self.exchange.fetchFundingRate(symbol: "XRP/USDT:USDT")
+             let response = try await self.exchange.fetchFundingRate(symbol: futuresSymbol)
              print(response)
          } catch {
              print(error.localizedDescription)
@@ -966,7 +1349,7 @@ struct ContentView: View {
     }
     func fetchFundingRateHistory() async {
          do {
-             let response = try await self.exchange.fetchFundingRateHistory(symbol: "XRP/USDT:USDT", limit: 1)
+             let response = try await self.exchange.fetchFundingRateHistory(symbol: futuresSymbol, limit: 1)
              print(response)
          } catch {
              print(error.localizedDescription)
@@ -974,7 +1357,7 @@ struct ContentView: View {
     }
     func fetchFundingInterval() async {
          do {
-             let response = try await self.exchange.fetchFundingInterval(symbol: "XRP/USDT:USDT")
+             let response = try await self.exchange.fetchFundingInterval(symbol: futuresSymbol)
              print(response)
          } catch {
              print(error.localizedDescription)
@@ -998,7 +1381,7 @@ struct ContentView: View {
     }
     func fetchIsolatedBorrowRate() async {
          do {
-             let response = try await self.exchange.fetchIsolatedBorrowRate(symbol: "XRP/USDT")
+             let response = try await self.exchange.fetchIsolatedBorrowRate(symbol: futuresSymbol)
              print(response)
          } catch {
              print(error.localizedDescription)
@@ -1006,7 +1389,7 @@ struct ContentView: View {
     }
     func fetchL2OrderBook() async {
          do {
-             let response = try await self.exchange.fetchL2OrderBook(symbol: "XRP/USDT")
+             let response = try await self.exchange.fetchL2OrderBook(symbol: futuresSymbol)
              print(response)
          } catch {
              print(error.localizedDescription)
@@ -1022,7 +1405,7 @@ struct ContentView: View {
     }
     func fetchLeverage() async {
          do {
-             let response = try await self.exchange.fetchLeverage(symbol: "XRP/USDT:USDT")
+             let response = try await self.exchange.fetchLeverage(symbol: futuresSymbol)
              print(response)
          } catch {
              print(error.localizedDescription)
@@ -1030,7 +1413,7 @@ struct ContentView: View {
     }
     func fetchLongShortRatioHistory() async {
          do {
-             let response = try await self.exchange.fetchLongShortRatioHistory(symbol: "XRP/USDT:USDT")
+             let response = try await self.exchange.fetchLongShortRatioHistory(symbol: futuresSymbol)
              print(response)
          } catch {
              print(error.localizedDescription)
@@ -1038,7 +1421,7 @@ struct ContentView: View {
     }
     func fetchMarginMode() async {
          do {
-             let response = try await self.exchange.fetchMarginMode(symbol: "XRP/USDT:USDT")
+             let response = try await self.exchange.fetchMarginMode(symbol: futuresSymbol)
              print(response)
          } catch {
              print(error.localizedDescription)
@@ -1046,7 +1429,7 @@ struct ContentView: View {
     }
     func fetchMarketLeverageTiers() async {
          do {
-             let response = try await self.exchange.fetchMarketLeverageTiers(symbol: "XRP/USDT:USDT")
+             let response = try await self.exchange.fetchMarketLeverageTiers(symbol: futuresSymbol)
              print(response)
          } catch {
              print(error.localizedDescription)
@@ -1070,7 +1453,7 @@ struct ContentView: View {
     }
     func fetchMyTrades() async {
          do {
-             let response = try await self.exchange.fetchMyTrades(symbol: "XRP/USDT:USDT")
+             let response = try await self.exchange.fetchMyTrades(symbol: futuresSymbol)
              print(response)
          } catch {
              print(error.localizedDescription)
@@ -1078,8 +1461,8 @@ struct ContentView: View {
     }
     func fetchOHLCV() async {
          do {
-             let response = try await self.exchange.fetchOHLCV(symbol: "XRP/USDT", timeframe: "1h", since: 1748736000000, limit: 1)
-             let markResponse = try await self.exchange.fetchOHLCV(symbol: "XRP/USDT", timeframe: "1h", since: 1748736000000, limit: 1, params: ["price": "mark"])
+             let response = try await self.exchange.fetchOHLCV(symbol: futuresSymbol, timeframe: "1h", since: 1748736000000, limit: 1)
+             let markResponse = try await self.exchange.fetchOHLCV(symbol: futuresSymbol, timeframe: "1h", since: 1748736000000, limit: 1, params: ["price": "mark"])
              print(response)
              print(markResponse)
          } catch {
@@ -1088,7 +1471,7 @@ struct ContentView: View {
     }
     func fetchOpenInterest() async {
          do {
-             let response = try await self.exchange.fetchOpenInterest(symbol: "XRP/USDT:USDT")
+             let response = try await self.exchange.fetchOpenInterest(symbol: futuresSymbol)
              print(response)
          } catch {
              print(error.localizedDescription)
@@ -1096,7 +1479,7 @@ struct ContentView: View {
     }
     func fetchOpenOrders() async {
          do {
-             let response = try await self.exchange.fetchOpenOrders(symbol: "XRP/USDT:USDT")
+             let response = try await self.exchange.fetchOpenOrders(symbol: futuresSymbol)
              print(response)
          } catch {
              print(error.localizedDescription)
@@ -1112,7 +1495,7 @@ struct ContentView: View {
     }
     func fetchOrderBook() async {
          do {
-             let response = try await self.exchange.fetchOrderBook(symbol: "XRP/USDT:USDT")
+             let response = try await self.exchange.fetchOrderBook(symbol: futuresSymbol)
              print(response)
          } catch {
              print(error.localizedDescription)
@@ -1120,7 +1503,7 @@ struct ContentView: View {
     }
     func fetchPosition() async {
          do {
-             let response = try await self.exchange.fetchPosition(symbol: "XRP/USDT:USDT")
+             let response = try await self.exchange.fetchPosition(symbol: futuresSymbol)
              print(response)
          } catch {
              print(error.localizedDescription)
@@ -1128,7 +1511,7 @@ struct ContentView: View {
     }
     func fetchPositionHistory() async {
          do {
-             let response = try await self.exchange.fetchPositionHistory(symbol: "XRP/USDT:USDT")
+             let response = try await self.exchange.fetchPositionHistory(symbol: futuresSymbol)
              print(response)
          } catch {
              print(error.localizedDescription)
@@ -1136,7 +1519,7 @@ struct ContentView: View {
     }
     func fetchPositionsHistory() async {
          do {
-             let response = try await self.exchange.fetchPositionsHistory(symbols: ["XRP/USDT:USDT"])
+             let response = try await self.exchange.fetchPositionsHistory(symbols: [futuresSymbol])
              print(response)
              _ = try await self.exchange.fetchPositionsHistory()
          } catch {
@@ -1145,7 +1528,7 @@ struct ContentView: View {
     }
     func fetchPositions() async {
          do {
-             let response = try await self.exchange.fetchPositions(symbols: ["XRP/USDT:USDT"])
+             let response = try await self.exchange.fetchPositions(symbols: [futuresSymbol])
              print(response)
          } catch {
              print(error.localizedDescription)
@@ -1153,7 +1536,7 @@ struct ContentView: View {
     }
     func fetchTicker() async {
          do {
-             let response = try await self.exchange.fetchTicker(symbol: "XRP/USDT")
+             let response = try await self.exchange.fetchTicker(symbol: futuresSymbol)
              print(response)
          } catch {
              print(error.localizedDescription)
@@ -1169,7 +1552,7 @@ struct ContentView: View {
     }
     func fetchTrades() async {
          do {
-             let response = try await self.exchange.fetchTrades(symbol: "XRP/USDT:USDT")
+             let response = try await self.exchange.fetchTrades(symbol: futuresSymbol)
              print(response)
          } catch {
              print(error.localizedDescription)
@@ -1177,7 +1560,7 @@ struct ContentView: View {
     }
     func fetchTradingFee() async {
          do {
-             let response = try await self.exchange.fetchTradingFee(symbol: "XRP/USDT:USDT")
+             let response = try await self.exchange.fetchTradingFee(symbol: futuresSymbol)
              print(response)
          } catch {
              print(error.localizedDescription)
@@ -1209,7 +1592,7 @@ struct ContentView: View {
     }
     func reduceMargin() async {
          do {
-             let response = try await self.exchange.reduceMargin(symbol: "XRP/USDT:USDT", amount: 1)
+             let response = try await self.exchange.reduceMargin(symbol: futuresSymbol, amount: 1)
              print(response)
          } catch {
              print(error.localizedDescription)
@@ -1225,7 +1608,7 @@ struct ContentView: View {
     }
     func repayIsolatedMargin() async {
          do {
-             let response = try await self.exchange.repayIsolatedMargin(symbol: "XRP/USDT:USDT", code: "USDT", amount: 1)
+             let response = try await self.exchange.repayIsolatedMargin(symbol: futuresSymbol, code: "USDT", amount: 1)
              print(response)
          } catch {
              print(error.localizedDescription)
@@ -1233,7 +1616,7 @@ struct ContentView: View {
     }
     func setMarginMode() async {
          do {
-             let response = try await self.exchange.setMarginMode(marginMode: "isolated", symbol: "XRP/USDT:USDT")
+             let response = try await self.exchange.setMarginMode(marginMode: "isolated", symbol: futuresSymbol)
              print(response)
          } catch {
              print(error.localizedDescription)
@@ -1241,7 +1624,7 @@ struct ContentView: View {
     }
     func setPositionMode() async {
          do {
-             let response = try await self.exchange.setPositionMode(hedged: true, symbol: "XRP/USDT:USDT")
+             let response = try await self.exchange.setPositionMode(hedged: true, symbol: futuresSymbol)
              print(response)
          } catch {
              print(error.localizedDescription)
@@ -1256,100 +1639,168 @@ struct ContentView: View {
          }
     }
     func watchBalance() async {
-         do {
-             let response = try await self.exchange.watchBalance()
-             print(response)
-         } catch {
-             print(error.localizedDescription)
-         }
+        while true {
+            do {
+                let balance = try await self.exchange.watchBalance()
+                print(balance)
+            } catch {
+                // handle errors
+                print("Error watching order book: \(error)")
+            }
+        }
     }
     func watchMyTrades() async {
-         do {
-             let response = try await self.exchange.watchMyTrades()
-             print(response)
-         } catch {
-             print(error.localizedDescription)
-         }
+        while true {
+            do {
+                let response = try await self.exchange.watchMyTrades()
+                print(response)
+            } catch {
+                // handle errors
+                print("Error watching order book: \(error)")
+            }
+        }
     }
     func watchOHLCV() async {
-         do {
-             let response = try await self.exchange.watchOHLCV(symbol: "BTC/USDT")
-             print(response)
-         } catch {
-             print(error.localizedDescription)
-         }
+        while true {
+            do {
+                let response = try await self.exchange.watchOHLCV(symbol: futuresSymbol)
+                print(response)
+            } catch {
+                // handle errors
+                print("Error watching order book: \(error)")
+            }
+        }
     }
     func watchOrderBook() async {
-         do {
-             let response = try await self.exchange.watchOrderBook(symbol: "BTC/USDT")
-             print(response)
-         } catch {
-             print(error.localizedDescription)
-         }
+        while true {
+            do {
+                let response = try await self.exchange.watchOrderBook(symbol: futuresSymbol)
+                print(response)
+            } catch {
+                // handle errors
+                print("Error watching order book: \(error)")
+            }
+        }
     }
     func watchBidsAsks() async {
-         do {
-             let response = try await self.exchange.watchBidsAsks()
-             print(response)
-         } catch {
-             print(error.localizedDescription)
-         }
+        while true {
+            do {
+                let response = try await self.exchange.watchBidsAsks()
+                print(response)
+            } catch {
+                // handle errors
+                print("Error watching order book: \(error)")
+            }
+        }
     }
     func watchOrderBookForSymbols() async {
-         do {
-             let response = try await self.exchange.watchOrderBookForSymbols(symbols: ["BTC/USDT"])
-             print(response)
-         } catch {
-             print(error.localizedDescription)
-         }
+        while true {
+            do {
+                let response = try await self.exchange.watchOrderBookForSymbols(symbols: [futuresSymbol]) 
+                print(response)
+            } catch {
+                // handle errors
+                print("Error watching order book: \(error)")
+            }
+        }
     }
     func watchOrders() async {
-         do {
-             let response = try await self.exchange.watchOrders()
-             print(response)
-         } catch {
-             print(error.localizedDescription)
-         }
+        while true {
+            do {
+                let response = try await self.exchange.watchOrders()
+                print(response)
+            } catch {
+                // handle errors
+                print("Error watching order book: \(error)")
+            }
+        }
     }
     func watchPositions() async {
-         do {
-             let response = try await self.exchange.watchPositions()
-             print(response)
-         } catch {
-             print(error.localizedDescription)
-         }
+        while true {
+            do {
+                let response = try await self.exchange.watchPositions()
+                print(response)
+            } catch {
+                // handle errors
+                print("Error watching order book: \(error)")
+            }
+        }
     }
     func watchTicker() async {
-         do {
-             let response = try await self.exchange.watchTicker(symbol: "BTC/USDT")
-             print(response)
-         } catch {
-             print(error.localizedDescription)
-         }
+        while true {
+            do {
+                let response = try await self.exchange.watchTicker(symbol: futuresSymbol)
+                print(response)
+            } catch {
+                // handle errors
+                print("Error watching order book: \(error)")
+            }
+        }
     }
     func watchTickers() async {
-         do {
-             let response = try await self.exchange.watchTickers(symbols: ["BTC/USDT"])
-             print(response)
-         } catch {
-             print(error.localizedDescription)
-         }
+        while true {
+            do {
+                let response = try await self.exchange.watchTickers(symbols: [futuresSymbol]) 
+                print(response)
+            } catch {
+                // handle errors
+                print("Error watching order book: \(error)")
+            }
+        }
     }
     func watchTrades() async {
-         do {
-             let response = try await self.exchange.watchTrades(symbol: "BTC/USDT")
-             print(response)
-         } catch {
-             print(error.localizedDescription)
-         }
+        while true {
+            do {
+                let response = try await self.exchange.watchTrades(symbol: futuresSymbol)
+                print(response)
+            } catch {
+                // handle errors
+                print("Error watching order book: \(error)")
+            }
+        }
     }
     func watchTradesForSymbols() async {
-         do {
-             let response = try await self.exchange.watchTradesForSymbols(symbols: ["BTC/USDT"])
-             print(response)
-         } catch {
-             print(error.localizedDescription)
-         }
+        while true {
+            do {
+                let response = try await self.exchange.watchTradesForSymbols(symbols: [futuresSymbol]) 
+                print(response)
+            } catch {
+                // handle errors
+                print("Error watching order book: \(error)")
+            }
+        }
+    }
+    func unWatchOrderBook() async {
+        do {
+            let response = try await self.exchange.unWatchOrderBook (symbol: futuresSymbol)
+            print(response)
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+    func unWatchOrders() async {
+        do {
+            let response = try await self.exchange.unWatchOrders (symbol: futuresSymbol)
+            print(response)
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+    // func unWatchTicker() async {
+    //     do {
+    //         let response = try await self.exchange.unWatchTicker (symbol: futuresSymbol)
+    //         print(response)
+    //     } catch {
+    //         print(error.localizedDescription)
+    //     }
+    // }
+    func unWatchTrades() async {
+        do {
+            let response = try await self.exchange.unWatchTrades (symbol: futuresSymbol)
+            print(response)
+        } catch {
+            print(error.localizedDescription)
+        }
     }
     func withdraw() async {
          do {
@@ -1358,6 +1809,250 @@ struct ContentView: View {
          } catch {
              print(error.localizedDescription)
          }
+    }
+    func getAccountsById() {
+        print(self.exchange.accountsById)
+    }
+    func getAlias() {
+        print(try self.exchange.alias)
+    }
+    func getApi() {
+        print(try self.exchange.api)
+    }
+    func getBalance() {
+        print(try self.exchange.balance)
+    }
+    func getBaseCurrencies() {
+        print(try self.exchange.baseCurrencies)
+    }
+    func getBidsasks() {
+        print(try self.exchange.bidsasks)
+    }
+    func getClients() {
+        print(try self.exchange.clients)
+    }
+    func getCodes() {
+        print(try self.exchange.codes)
+    }
+    func getCommonCurrencies() {
+        print(try self.exchange.commonCurrencies)
+    }
+    func getCurrencies_by_id() {
+        print(try self.exchange.currencies_by_id)
+    }
+    func getCurrencies() {
+        print(try self.exchange.currencies)
+    }
+    func getExceptions() {
+        print(try self.exchange.exceptions)
+    }
+    func getFeatures() {
+        print(try self.exchange.features)
+    }
+    func getFees() {
+        print(try self.exchange.fees)
+    }
+    func getFundingRates() {
+        print(try self.exchange.fundingRates)
+    }
+    func getHas() {
+        print(try self.exchange.has)
+    }
+    func getHostname() {
+        print(try self.exchange.hostname)
+    }
+    func getHttpExceptions() {
+        print(try self.exchange.httpExceptions)
+    }
+    func getHttpProxyAgentModule() {
+        print(try self.exchange.httpProxyAgentModule)
+    }
+    func getHttpsProxyAgentModule() {
+        print(try self.exchange.httpsProxyAgentModule)
+    }
+    func getId() {
+        print(try self.exchange.id)
+    }
+    func getIds() {
+        print(try self.exchange.ids)
+    }
+    func getIsSandboxModeEnabled() {
+        print(try self.exchange.isSandboxModeEnabled)
+    }
+    func getLast_http_response() {
+        print(try self.exchange.last_http_response)
+    }
+    func getLast_request_body() {
+        print(try self.exchange.last_request_body)
+    }
+    func getLast_request_headers() {
+        print(try self.exchange.last_request_headers)
+    }
+    func getLast_request_url() {
+        print(try self.exchange.last_request_url)
+    }
+    func getLimits() {
+        print(try self.exchange.limits)
+    }
+    func getLiquidations() {
+        print(try self.exchange.liquidations)
+    }
+    func getLogin() {
+        print(try self.exchange.login)
+    }
+    func getMarkets_by_id() {
+        print(try self.exchange.markets_by_id)
+    }
+    func getMarkets() {
+        print(try self.exchange.markets)
+    }
+    func getMAX_VALUE() {
+        print(try self.exchange.MAX_VALUE)
+    }
+    func getMyLiquidations() {
+        print(try self.exchange.myLiquidations)
+    }
+    func getMyTrades() {
+        print(try self.exchange.myTrades)
+    }
+    func getName() {
+        print(try self.exchange.name)
+    }
+    func getNewUpdates() {
+        print(try self.exchange.newUpdates)
+    }
+    func getOhlcvs() {
+        print(try self.exchange.ohlcvs)
+    }
+    func getOptions() {
+        print(try self.exchange.options)
+    }
+    func getOrderbooks() {
+        print(try self.exchange.orderbooks)
+    }
+    func getOrders() {
+        print(try self.exchange.orders)
+    }
+    func getPositions() {
+        print(try self.exchange.positions)
+    }
+    func getPrecision() {
+        print(try self.exchange.precision)
+    }
+    func getProxyDictionaries() {
+        print(try self.exchange.proxyDictionaries)
+    }
+    func getQuoteCurrencies() {
+        print(try self.exchange.quoteCurrencies)
+    }
+    func getRateLimit() {
+        print(try self.exchange.rateLimit)
+    }
+    func getReduceFees() {
+        print(try self.exchange.reduceFees)
+    }
+    func getRequiredCredentials() {
+        print(try self.exchange.requiredCredentials)
+    }
+    func getReturnResponseHeaders() {
+        print(try self.exchange.returnResponseHeaders)
+    }
+    func getSocksProxyAgentModule() {
+        print(try self.exchange.socksProxyAgentModule)
+    }
+    func getSocksProxyAgentModuleChecked() {
+        print(try self.exchange.socksProxyAgentModuleChecked)
+    }
+    func getSubstituteCommonCurrencyCodes() {
+        print(try self.exchange.substituteCommonCurrencyCodes)
+    }
+    func getSymbols() {
+        print(try self.exchange.symbols)
+    }
+    func getThrottler() {
+        print(try self.exchange.throttler)
+    }
+    func getTickers() {
+        print(try self.exchange.tickers)
+    }
+    func getTimeframes() {
+        print(try self.exchange.timeframes)
+    }
+    func getToken() {
+        print(try self.exchange.token)
+    }
+    func getTokenBucket() {
+        print(try self.exchange.tokenBucket)
+    }
+    func getTrades() {
+        print(try self.exchange.trades)
+    }
+    func getTransactions() {
+        print(try self.exchange.transactions)
+    }
+    func getTriggerOrders() {
+        print(try self.exchange.triggerOrders)
+    }
+    func getUrls() {
+        print(try self.exchange.urls)
+    }
+    func getUserAgent() {
+        print(try self.exchange.userAgent)
+    }
+    func getUserAgents() {
+        print(try self.exchange.userAgents)
+    }
+    func getVersion() {
+        print(try self.exchange.version)
+    }
+    func setApiKey() {
+        do {
+            try self.exchange.setApiKey(newValue: "abc")
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+    func setSecret() {
+        do {
+            try self.exchange.setSecret(newValue: "abc")
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+    func setTimeout() {
+        do {
+            try self.exchange.setTimeout(newValue: 1234567890)
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+    func setTwofa() {
+        do {
+            try self.exchange.setTwofa(newValue: "abc")
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+    func setUid() {
+        do {
+            try self.exchange.setUid(newValue: "1234567890")
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+    func setVerbose() {
+        do {
+            try self.exchange.setVerbose(newValue: true)
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+    func setWalletAddress() {
+        do {
+            try self.exchange.setWalletAddress(newValue: "0x1234567890123456789012345678901234567890")
+        } catch {
+            print(error.localizedDescription)
+        }
     }
 //    func createConvertTrade() async {
 //         do {
@@ -1369,61 +2064,12 @@ struct ContentView: View {
 //    }
 //    func fetchMarkPrice() async {
 //         do {
-//             let response = try await self.exchange.fetchMarkPrice("BTC/USDT")
+//             let response = try await self.exchange.fetchMarkPrice(futuresSymbol)
 //             print(response)
 //         } catch {
 //             print(error.localizedDescription)
 //         }
 //    }
-    
-    
-    func appendToFile(_ text: String, at path: String) {
-        let url = URL(fileURLWithPath: path)
-        let data = (text + "\n").data(using: .utf8)!
-
-        if FileManager.default.fileExists(atPath: path) {
-            if let handle = try? FileHandle(forWritingTo: url) {
-                handle.seekToEndOfFile()
-                handle.write(data)
-                handle.closeFile()
-            }
-        } else {
-            try? data.write(to: url)
-        }
-    }
-    
-    func testRateLimiter() async throws {
-        print("testRateLimiter")
-        let exchange = Binance(config: [
-            "enableRateLimit": true,
-            "rateLimiterAlgorithm": "rollingWindow",
-            "maxLimiterRequests": 5000
-        ])!
-        _ = try await exchange.loadMarkets()
-
-        for times in [1, 10, 100, 1000] {
-            let startTime = Date().timeIntervalSince1970 * 1000
-
-            await withTaskGroup(of: Void.self) { group in
-                for (i, _) in (0..<times).enumerated() {
-                    group.addTask {
-                        do {
-                            let ticker = try await exchange.fetchTicker(symbol: "BTC/USDT")
-//                            let timestamp = ticker["timestamp"] as? Int
-//                            print(String(timestamp ?? 0))
-                        } catch {
-                            print("fetchTicker failed at iteration \(i): \(error)")
-                        }
-                    }
-                }
-                await group.waitForAll()
-            }
-
-            let endTime = Date().timeIntervalSince1970 * 1000
-            let duration = endTime - startTime
-            print("Parallel: \(times) requests in \(duration)ms")
-        }
-    }
 
 }
 

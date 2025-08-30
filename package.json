@@ -9,17 +9,18 @@
     "transpileGO": "cd .. && npm run transpileGO && cd ccxt-native",
     "transpileGORest": "cd .. && npm run transpileGORest && cd ccxt-native",
     "transpileGOWs": "cd .. && npm run transpileGOWs && cd ccxt-native",
-
     "build": "npm run transpile && npm run buildSwift && npm run buildAndroid",
     "buildAndroid": "echo \"TODO: buildAndroid\"",
     "buildSwift": "tsx main/build/buildXcframework.ts",
-    "cleanGOmobile": "./main/build/goPatches/cleanGomobileCache.sh",
-    "patchGO": "./main/build/goPatches/goPatch.sh",
-    "test": "echo Error: no test specified && exit 1",
+    "buildSwiftRest": "tsx main/build/buildXcframework.ts --rest",
+    "buildSwiftPro": "tsx main/build/buildXcframework.ts --pro",
     "transpile": "npm run transpileSwift && npm run transpileGOWrapper && npm run transpileAndroid",
     "transpileAndroid": "tsx main/build/transpileAndroid.ts",
     "transpileGOWrapper": "tsx main/build/transpileGoWrapper.ts",
-    "transpileSwift": "tsx main/build/transpileSwift.ts"
+    "transpileSwift": "tsx main/build/transpileSwift.ts",
+    "cleanGOmobile": "./main/build/goPatches/cleanGomobileCache.sh",
+    "patchGO": "./main/build/goPatches/goPatch.sh",
+    "test": "echo Error: no test specified && exit 1"
   },
   "repository": {
     "type": "git",
@@ -129,5 +130,8 @@
   "bugs": {
     "url": "https://github.com/ccxt-native/ccxt-native/issues"
   },
-  "homepage": "https://github.com/ccxt-native/ccxt-native#readme"
+  "homepage": "https://github.com/ccxt-native/ccxt-native#readme",
+  "devDependencies": {
+    "eslint": "^9.34.0"
+  }
 }

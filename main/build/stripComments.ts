@@ -63,7 +63,27 @@ class GoCommentStripper {
             if (!inString && !inChar) {
                 // Check for single-line comment (//)
                 if (char === '/' && i + 1 < content.length && content[i + 1] === '/') {
-                    // Skip to end of line
+                    // Determine end of line first
+                    const lineEnd = content.indexOf('\n', i);
+                    const endIdx = lineEnd === -1 ? content.length : lineEnd;
+                    const commentText = content.slice(i, endIdx);
+                    const trimmedComment = commentText.trim();
+
+                    // Preserve injection markers
+                    if (
+                        trimmedComment === '// BEGIN: INJECT GETTERS AND SETTERS HERE //' ||
+                        trimmedComment === '// END: INJECT GETTERS AND SETTERS HERE //'
+                    ) {
+                        // Keep the comment as-is
+                        result += commentText;
+                        if (lineEnd !== -1) {
+                            result += '\n';
+                        }
+                        i = endIdx + (lineEnd === -1 ? 0 : 1);
+                        continue;
+                    }
+
+                    // Skip to end of line for other comments
                     while (i < content.length && content[i] !== '\n') {
                         i++;
                     }

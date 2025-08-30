@@ -12,16 +12,20 @@ export const originGoDir: string = `${ccxtNativeDir}/main/go`;
 export const licenseFile: string = `${ccxtDir}/LICENSE.txt`;
 
 
-export const tsPaths = {
+export const ccxtPaths = {
     exchange: `${ccxtTsDir}/Exchange.ts`,
     types: `${ccxtTsDir}/types.ts`,
     errors: `${ccxtTsDir}/errors.ts`,
+    goInterface: `${ccxtDir}/go/v4/exchange_interface.go`,
+    goExtendedInterface: `${ccxtDir}/go/v4/exchange_interface_extended.go`,
+    generatedExchange: `${ccxtDir}/go/v4/exchange_generated_getters_setters.go`,
 };
 
 export const originalFiles = {
     swiftExchange: `${originSwiftDir}/CCXTExchange.swift`,
     swiftErrors: `${originSwiftDir}/CCXTErrors.swift`,
     swiftPackage: `${originSwiftDir}/Package.swift`,
+    swiftExample: `${originSwiftDir}/Example.swift`,
     androidExchange: `${originAndroidDir}/CCXTExchange.java`,
     androidErrors: `${originSwiftDir}/CCXTErrors.swift`,
     gowrapper: `${originGoDir}/ccxtwrapper.go`,

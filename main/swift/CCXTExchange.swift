@@ -76,69 +76,102 @@ public class Exchange {
         case decoding(Error)    // genuine JSON-decoding problem
     }
     
-    private func decode(_ data: Data) throws -> Any {
-        // First, try to parse as JSON, the normal successful path
-        do {
-            return try JSONSerialization.jsonObject(with: data, options: [])
-        } catch {
-            // Not valid JSON -> might be a ccxt panic string. Check that format.
-            // Expected format (single-line, simplified):
-            //   "panic: ... [ccxtError]::[<ErrorClass>]::[<exchange> {\"code\":...,\"msg\":...}]\nStack:\n"
-            if let s = String(data: data, encoding: .utf8) {
-                // Try to extract the segment after the last "[ccxtError]::["
-                // Split by "::"- panic string delimeter
-                let segments = s.components(separatedBy: "::")
-                if segments.count >= 3,
-                   segments[0].contains("[ccxtError]") {
-                    // Example segments:
-                    //  [0] ...[ccxtError]
-                    //  [1] "[ExchangeError]"
-                    //  [2] "[bitget {\"code\":...}..."
-                    // Extract error type (remove brackets)
-                    let rawType = segments[1].trimmingCharacters(in: CharacterSet(charactersIn: "[]"))
+    private func decode(_ value: Any?) throws -> Any? {
+        guard let value = value else {
+            return nil
+        }
 
-                    // message embedded in a JSON object -> {"msg": ...}
-                    if let jsonStart = s.firstIndex(of: "{"),
-                       let jsonEnd = s[jsonStart...].firstIndex(of: "}") {
+        switch value {
+        case let data as Data:
+            // Quick check for literal boolean or null
+            if var s = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) {
+                if s == "true" { return true }
+                if s == "false" { return false }
+                if s == "null" { return nil }
 
-                        let jsonRange = jsonStart...jsonEnd
-                        var jsonSubstring = String(s[jsonRange])
-                        jsonSubstring = jsonSubstring.replacingOccurrences(of: "\\\"", with: "\"")
-
-                        if let jsonData = jsonSubstring.data(using: .utf8),
-                           let jsonObj = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any] {
-
-                            let message = (jsonObj["msg"] as? String) ??
-                                           (jsonObj["message"] as? String) ?? jsonSubstring
-
-                            if let errorClass = NSClassFromString("CCXTSwift.\(rawType)") as? BaseError.Type {
-                                throw errorClass.init(message)
-                            }
-                            throw CCXTError.exchange(message)
-                        }
-                    }
-
-                    // plain message wrapped in brackets, take last segment
-                    let tail = segments.last ?? ""
-                    var plainMsg = tail.replacingOccurrences(
-                                      of: "]\\nStack:\\n\"",  // literal ]\nStack:\n"
-                                      with: "")
-
-                    plainMsg = plainMsg.trimmingCharacters(
-                                   in: CharacterSet(charactersIn: "[]\"\n "))
-
-                    if let errorClass = NSClassFromString("CCXTSwift.\(rawType)") as? BaseError.Type {
-                        throw errorClass.init(plainMsg)
-                    }
-                    throw CCXTError.exchange(plainMsg)
-                }
-                // Could read as UTF-8 but not recognised panic format
-                throw CCXTError.exchange(s.trimmingCharacters(in: .whitespacesAndNewlines))
+                // Parse number-like strings
+                if let intVal = Int(s) { return intVal }
+                if let doubleVal = Double(s) { return doubleVal }
             }
-            // Still unknown binary payload
-            throw CCXTError.decoding(error)
+
+            do {
+                // Normal JSON parse
+                return try JSONSerialization.jsonObject(with: data, options: [])
+            } catch {
+                // CCXT panic parsing
+                if let s = String(data: data, encoding: .utf8), s.contains("[ccxtError]::[") {
+                    let segments = s.components(separatedBy: "::")
+                    if segments.count >= 3 {
+                        let rawType = segments[1].trimmingCharacters(in: CharacterSet(charactersIn: "[]"))
+                        if let jsonStart = s.firstIndex(of: "{"),
+                        let jsonEnd = s[jsonStart...].firstIndex(of: "}") {
+                            var jsonSubstring = String(s[jsonStart...jsonEnd])
+                            jsonSubstring = jsonSubstring.replacingOccurrences(of: "\\\"", with: "\"")
+                            if let jsonData = jsonSubstring.data(using: .utf8),
+                            let jsonObj = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any] {
+                                let message = (jsonObj["msg"] as? String) ??
+                                            (jsonObj["message"] as? String) ??
+                                            jsonSubstring
+                                if let errorClass = NSClassFromString("CCXTSwift.\(rawType)") as? BaseError.Type {
+                                    throw errorClass.init(message)
+                                }
+                                throw CCXTError.exchange(message)
+                            }
+                        }
+
+                        let tail = segments.last ?? ""
+                        var plainMsg = tail.replacingOccurrences(of: "]\\nStack:\\n\"", with: "")
+                        plainMsg = plainMsg.trimmingCharacters(in: CharacterSet(charactersIn: "[]\"\n "))
+
+                        if let errorClass = NSClassFromString("CCXTSwift.\(rawType)") as? BaseError.Type {
+                            throw errorClass.init(plainMsg)
+                        }
+                        throw CCXTError.exchange(plainMsg)
+                    }
+                }
+
+                // Non-panic string / invalid JSON
+                if var s = String(data: data, encoding: .utf8) {
+                    // Strip outer quotes and unescape
+                    if s.hasPrefix("\"") && s.hasSuffix("\"") {
+                        s.removeFirst()
+                        s.removeLast()
+                        s = s.replacingOccurrences(of: "\\\"", with: "\"")
+                        s = s.replacingOccurrences(of: "\\n", with: "\n")
+                    }
+                    if let intVal = Int(s) { return intVal }
+                    if let doubleVal = Double(s) { return doubleVal }
+                    return s
+                }
+
+                throw CCXTError.decoding(error)
+            }
+
+        case let str as String:
+            // Numeric conversion
+            if let intVal = Int(str) { return intVal }
+            if let doubleVal = Double(str) { return doubleVal }
+            return str
+
+        case let number as NSNumber:
+            if CFGetTypeID(number) == CFBooleanGetTypeID() {
+                return number.boolValue
+            } else if CFNumberIsFloatType(number) {
+                return number.doubleValue
+            } else {
+                return number.intValue
+            }
+
+        case let bool as Bool:
+            return bool
+
+        default:
+            return value
         }
     }
+
+
+
 
     // ------------------------------------------------------------------------
 

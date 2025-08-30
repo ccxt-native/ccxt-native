@@ -1,5 +1,6 @@
 import { createWrapperFile } from "./shared";
 import { androidBinaries, originalFiles } from "./filepaths";
+import { Property } from "./types";
 
 function androidMethodDeclaration (
     methodName: string,
@@ -10,31 +11,43 @@ function androidMethodDeclaration (
 `;
 }
 
+function androidPropertyDeclaration (prop: Property) {
+    return ``;
+}
+
 function createAndroidErrors (outputFile: string) {
-    return
+    return;
 }
 
 function createAndroidTypes(outputFile: string) {
-    return
+    return;
 }
 
 function createAndroidExchangeClasses (outputFile: string) {
-    return
+    return;
 }
 
-export default function transpileAndroid () {
-    for (const [key, filePath] of Object.entries (androidBinaries)) {
+export default async function transpileAndroid (binaries: {[key: string]: string}) {
+    for (const [key, filePath] of Object.entries (binaries)) {
         createAndroidTypes (`${filePath}/CCXTTypes.java`);
         createAndroidExchangeClasses (`${filePath}/CCXTExchanges.java`);
         createAndroidErrors (`${filePath}/CCXTErrors.java`);
         createWrapperFile (
             androidMethodDeclaration,
+            androidPropertyDeclaration,
             originalFiles.androidExchange,
             `${filePath}/CCXTExchange.java`,
             {},
-            key === 'pro'
+            key === 'pro',
         );
     }
 }
 
-transpileAndroid ();
+const args = process.argv.slice (2);
+if (args.includes ('--pro')) {
+    transpileAndroid ({'pro': androidBinaries.pro});
+} else if (args.includes('--rest')) {
+    transpileAndroid ({'rest': androidBinaries.rest});
+} else {
+    transpileAndroid (androidBinaries);
+}

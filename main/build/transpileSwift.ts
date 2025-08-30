@@ -1,9 +1,10 @@
 import * as fs from 'fs';
 import ccxt from '../../../js/ccxt.js';
 import { capitalize, lowercaseFirstLetter, prefixWith } from './util.js';
-import { tsPaths, swiftBinaries, originalFiles } from './filepaths.js';
-import { createGeneratedFile, createWrapperFile, customTypes } from './shared.js';
-import { appendFileSync } from 'fs';
+import { ccxtPaths, swiftBinaries, originalFiles } from './filepaths.js';
+import { createGeneratedFile, createWrapperFile, customTypes, simpleTypes } from './shared.js';
+import { appendFileSync, copyFileSync } from 'fs';
+import { Property } from './types.js';
 
 function splitAtProblemPhrase(methodName: string): string[] {
     if (methodName === 'signIn') {
@@ -32,7 +33,11 @@ function splitAtProblemPhrase(methodName: string): string[] {
 /**
  * Converts a single type name (as a string) to a swift type
  */
-function tsTypeToSwift(tsType: string): string {
+/**
+ * Converts a single TypeScript type name (as a string) to a Swift type
+ * ChatGPT code, can be entirely replaced if the new solution works
+ */
+function tsTypeToSwift(tsType?: string): string {
     if (!tsType) return "Void";
 
     /* 1) [A,B][] → [(A, B)] */
@@ -44,7 +49,7 @@ function tsTypeToSwift(tsType: string): string {
     }
 
     /* 2) T[], T[][], T[][][] → [T], [[T]], [[[T]]] */
-    const arrayDepthMatch = tsType.match(/^(\w+)((\[\])+)\s*$/);
+    const arrayDepthMatch = tsType.match(/^(.+?)(\[\])+$/);
     if (arrayDepthMatch) {
         const baseType = arrayDepthMatch[1];
         const brackets = arrayDepthMatch[2];
@@ -58,8 +63,8 @@ function tsTypeToSwift(tsType: string): string {
     }
 
     /* 3) fixed-length tuple [T, U, …] → (T, U, …) */
-    const tupleMatch = tsType.match(/^\[\s*([^,\]]+\s*,\s*[^,\]]+.*?)\s*\]$/);
-    if (tupleMatch) {
+    const tupleMatch = tsType.match(/^\[\s*(.+)\s*\]$/);
+    if (tupleMatch && tupleMatch[1].includes(",")) {
         const inner = tupleMatch[1]
             .split(",")
             .map(p => tsTypeToSwift(p.trim()))
@@ -67,37 +72,8 @@ function tsTypeToSwift(tsType: string): string {
         return `(${inner})`;
     }
 
-    /* 4) collapse Partial<X> → X (stand-alone or inside unions) */
+    /* 4) collapse Partial<X> → X */
     tsType = tsType.replace(/Partial<\s*([^>]+?)\s*>/g, "$1");
-
-    /* helper for a single (non-union) token */
-    const mapSingle = (t: string): string =>
-        t
-            .replace(/\bobject\b/g, "[String: Any]")
-            .replace(/\bnumber\b/g, "Double")
-            .replace(/\bstring\b/g, "String")
-            .replace(/\bBool\b/g, "Bool?")
-            .replace(/\bboolean\b/g, "Bool")
-            .replace(/\bany\b/g, "Any")
-            .replace(/\bundefined\b/g, "Any")
-            .replace(/\bnull\b/g, "Any")
-            .replace(/\bvoid\b/g, "Void")
-            .replace(/Dictionary<([^>]+)>/g, "[String: $1]")
-            .replace(/\bDict\b/g, "[String: Any]")
-            .replace(/\bNullableDict\b/g, "[String: Any]?")
-            .replace(/\bList\b/g, "[Any]")
-            .replace(/\bNullableList\b/g, "[Any]?")
-            .replace(/\bNum\b/g, "Double?")
-            .replace(/\bInt\b/g, "Int?")
-            .replace(/\bint\b/g, "Int")
-            .replace(/\bStr\b/g, "String?")
-            .replace(/\bStrings\b/g, "[String]?")
-            .replace(/\bIndexType\b/g, "Any")
-            .replace(/\bOrderSide\b/g, "String?")
-            .replace(/\bOrderType\b/g, "String")
-            .replace(/\bMarketType\b/g, "String")
-            .replace(/\bSubType\b/g, "String?")
-            .trim();
 
     /* 5) handle unions */
     if (tsType.includes("|")) {
@@ -105,10 +81,12 @@ function tsTypeToSwift(tsType: string): string {
 
         const isLit   = (p: string) => /^'[^']*'$/.test(p);
         const isStrKw = (p: string) => p === "string";
-        const isStrAl = (p: string) => p === "Str";
         const isUndef = (p: string) => p === "undefined";
         const isNull  = (p: string) => p === "null";
         const isStrAr = (p: string) => p === "string[]";
+        const isStrAl = (p: string) => p === "Str";
+        const isNumAl = (p: string) => p === "Num";
+        const isBoolAl = (p: string) => p === "Bool";
 
         if (parts.every(p => isLit(p) || isStrKw(p) || isStrAl(p) || isUndef(p) || isNull(p))) {
             return parts.some(isUndef) || parts.some(isNull) ? "String?" : "String";
@@ -124,15 +102,68 @@ function tsTypeToSwift(tsType: string): string {
             return mapped.endsWith("?") ? mapped : `${mapped}?`;
         }
 
-        if (parts.every(p => p === "number" || p === "string" || isUndef(p) || isNull(p))) {
-            return "Any";
-        }
-
+        parts.forEach(p => {
+            if (isStrAl(p) || isUndef(p) || isNull(p) || isNumAl(p) || isBoolAl(p)) {
+                return "Any?";
+            }
+        });
         return "Any";
     }
 
-    /* 6) single token */
+    /* 6) single token mapping */
     return mapSingle(tsType);
+
+    /* helper to map a single (non-union) type dynamically */
+    function mapSingle(t: string): string {
+        t = t.trim();
+
+        // basic types
+        switch (t) {
+            case "number": return "Double";
+            case "string": return "String";
+            case "boolean": return "Bool";
+            case "Bool": return "Bool?";
+            case "Int": return "Int?";
+            case "Num": return "Double?";
+            case "Str": return "String?";
+            case "int": return "Int";
+            case "List": return "[Any]";
+            case "Dict": return "[String: Any]";
+            case "WsClient": return "Any";
+            case "ArrayCache": return "Any";
+            case "object": return "[String: Any]";
+            case "ArrayCacheByTimestamp": return "Any";
+            case "any":
+            case "undefined":
+            case "null":
+                return "Any";
+            case "void": return "Void";
+        }
+
+        // array T[]
+        const arrayMatch = t.match(/^(.+)\[\]$/);
+        if (arrayMatch) {
+            const inner = tsTypeToSwift(arrayMatch[1]);
+            return `[${inner}]`;
+        }
+
+        // dictionary Dictionary<T>
+        const dictMatch = t.match(/^Dictionary<(.+)>$/);
+        if (dictMatch) {
+            const inner = tsTypeToSwift(dictMatch[1]);
+            return `[String: ${inner}]`;
+        }
+
+        // promise Promise<T>
+        const promiseMatch = t.match(/^Promise<(.+)>$/);
+        if (promiseMatch) {
+            const inner = tsTypeToSwift(promiseMatch[1]);
+            return `Promise<${inner}>`;
+        }
+
+        // fallback: return as-is
+        return t;
+    }
 }
 
 const swiftErrorDeclaration = (className: string, bassClassName: string): string => (
@@ -145,7 +176,7 @@ const swiftErrorDeclaration = (className: string, bassClassName: string): string
 
 function createSwiftErrors (outputFile: string) {
     const swiftErrors: string[] = [];
-    const tsErrors = fs.readFileSync(tsPaths['errors'], "utf8");
+    const tsErrors = fs.readFileSync(ccxtPaths['errors'], "utf8");
     const lines     = tsErrors.split("\n");
     for (const line of lines) {
         const match = line.trim().match(/^class\s+(\w+)\s+extends\s+(\w+)/);
@@ -164,7 +195,7 @@ function createSwiftErrors (outputFile: string) {
  * converts all types in types.ts to swift types and prints them to CCXTTypes.swift
  */
 function createSwiftTypes(outputFile: string) {
-    const tsContent = fs.readFileSync(tsPaths['types'], "utf8");
+    const tsContent = fs.readFileSync(ccxtPaths['types'], "utf8");
     const lines     = tsContent.split("\n");
 
     const excluded = new Set([
@@ -297,6 +328,8 @@ const getSwiftReturnType = (methodName: string, tsType: string): string => {
         return "[String: [String: Any]]";
     } else if (methodName === "describe") {
         return "[String: Any]";
+    } else if (methodName === "setSandboxMode") {
+        return "Void";
     }
     const swiftTypes = {
         "int": "Int",
@@ -373,10 +406,35 @@ const getSwiftReturnType = (methodName: string, tsType: string): string => {
     }
 }
 
-const swiftMethodDeclaration = (methodName: string, params: {[key: string]: [string, string | null]}, returnType: string) => {
+// TODO: combine this with the method above
+const getSwiftPropReturnType = (prop: Property) => {
+    if (prop.name === 'timeout') {
+        return "Int64";
+    }
+    return tsTypeToSwift(prop.type)
+        .replace("Liquidation", '[String: Any]')
+        .replace("OrderBook", '[String: Any]')
+        .replace("Ticker", '[String: Any]')
+        .replace("FundingRate", '[String: Any]')
+        .replace("Ticker", '[String: Any]')
+        .replace("Transaction", '[String: Any]')
+        .replace("Liquidation", '[String: Any]')
+        .replace("Ob", '[String: Any]')
+        .replace("Currencies", '[String: Any]')
+        .replace("CurrencyInterface", '[String: Any]')
+        .replace("Account", '[String: Any]')
+        .replace("RequiredCredentials", '[String: Any]')
+        .replace("TradingFeeInterface", '[String: Any]')
+        .replace("Urls", '[String: Any]')
+        .replace("MarketLimits", '[String: Any]?')
+        .replace("Precision", '[String: Any]?');
+}
+
+const swiftMethodDeclaration = (methodName: string, params: {[key: string]: [string, string | null]}, returnType: string, isAsync: boolean) => {
     // TODO: add return types, right now all the return types need to be Any because the info property prevents them from extended encodeable
     // const swiftReturnType = tsTypeToSwift(returnType);
     // const guardClause = (swiftReturnType === 'Any') ? `` : `as? ${swiftReturnType}`;
+    const returnVoid = returnType === 'void';
     const swiftParams = Object.keys(params).map(key => {
         const [tsType, defaultValue] = params[key];
         const paramType = tsTypeToSwift(tsType);
@@ -394,6 +452,7 @@ const swiftMethodDeclaration = (methodName: string, params: {[key: string]: [str
     const arrayParams: string[] = [];
     let index = 0;
     const [callMethodName, firstExternalName] = splitAtProblemPhrase(methodName);
+    let hasParams = false;
     Object.keys(params).forEach(paramName => {
         const [paramType, defaultValue] = params[paramName];
         const isArray = paramType.includes('[]');
@@ -408,6 +467,7 @@ const swiftMethodDeclaration = (methodName: string, params: {[key: string]: [str
                 arrayParams.push(paramName);
                 newName = `${paramName}_string`;
             } else if (paramName === 'params') {
+                hasParams = true;
                 newName = 'paramsData';
             }
             const externalName = (index === 0) ? firstExternalName : `${paramName}: `.replace(/type/g, 'typeVar'); // type is a reserved word in Go, so we need to rename it to typeVar
@@ -431,24 +491,26 @@ const swiftMethodDeclaration = (methodName: string, params: {[key: string]: [str
     //             throw NSError(domain: "CCXT", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid response type for ${methodName}"])
     //         }\n`;
     return`
-    public func ${methodName} (${swiftParams}) async throws -> ${swiftReturnType} {
-        try await withCheckedThrowingContinuation { continuation in
+    public func ${methodName} (${swiftParams})${isAsync ? ' async' : ''} throws -> ${swiftReturnType} {
+        ${isAsync ? `try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<${swiftReturnType}, Error>) in
             DispatchQueue.global(qos: .userInitiated).async {
-                do {${optionalsCode}${customTypeParamsCode}${arrayParamsCode}
-                    let paramsData = try? JSONSerialization.data(withJSONObject: ${paramsCopy ? 'paramsCopy' : 'params'})
-                    let data = try self.exchange.${callMethodName}(${goCallParams.join(', ')})
+                do {${optionalsCode}${customTypeParamsCode}${arrayParamsCode}` : ''}
+                    ${hasParams ? `let paramsData = try? JSONSerialization.data(withJSONObject: ${paramsCopy ? 'paramsCopy' : 'params'})` : ''}
+                    ${returnVoid
+                    ? `try self.exchange.${callMethodName}(${goCallParams.join(', ')})`
+                    : `let data = try self.exchange.${callMethodName}(${goCallParams.join(', ')})
                     do {
                         let jsonObject = try self.decode(data)
                         let cleaned = self.cleanAny(jsonObject)
                         continuation.resume(returning: cleaned as! ${swiftReturnType})
                     } catch {
                         continuation.resume(throwing: error)
-                    }
-                } catch {
+                    }`}
+                ${isAsync ? `} catch {
                     continuation.resume(throwing: error)
                 }
             }
-        }
+        }` : ''}
     }
 `
 }
@@ -468,22 +530,83 @@ function createSwiftExchangeClasses (outputFile: string) {
     createGeneratedFile (outputFile, exchangeDeclarations);
 }
 
-export default async function transpileSwift () {
+const swiftGetter = (prop: Property) => {
+    // let propValue = try? self.exchange.get${capitalize(prop.name)}() else {
+    //     return ${tsTypeToSwift(prop.type)}
+    // }
+    return `get {
+            let propValue = try? self.exchange.get${capitalize(prop.name)}()
+            let jsonObject = try! self.decode(propValue)
+            let cleaned = self.cleanAny(jsonObject)! as! ${getSwiftPropReturnType(prop)}
+            return cleaned
+        }`
+};
 
-    for (const [key, filePath] of Object.entries (swiftBinaries)) {
+const swiftSetInner = (prop: Property, indent: number) => {
+    const simpleReturnType = prop.type && simpleTypes.has (prop.type);
+    const methodName = `set${capitalize(prop.name)}`;
+    const tabs = '    '.repeat(indent);
+    if (simpleReturnType) {
+        return `try? self.exchange.${methodName}(newValue as! ${getSwiftPropReturnType(prop).replace('\?', '')})`
+    } else {
+        return `let serialized = try? JSONSerialization.data(withJSONObject: newValue)\n${tabs}try? self.exchange.${methodName}(serialized)`;
+    }
+};
+
+const swiftSetter = (prop: Property) => {
+    return `set {
+            ${swiftSetInner(prop, 3)}
+        }`
+};
+
+const swiftSetMethod = (prop: Property) => {
+    const methodName = `set${capitalize(prop.name)}`;
+    return `
+    public func ${methodName}(newValue: ${getSwiftPropReturnType(prop)}) {
+        ${swiftSetInner(prop, 2)}
+    }`;
+};
+
+const swiftProperty = (prop: Property) => (`
+    public var ${prop.name}: ${getSwiftPropReturnType(prop)} {
+        ${swiftGetter(prop)}
+        ${prop.hasSetter ? swiftSetter(prop) : ''}
+    }`
+);
+
+function swiftPropertyDeclaration (prop: Property) {
+    if (prop.hasGetter) {
+        return swiftProperty(prop);
+    } else {
+        return swiftSetMethod(prop);
+    }
+}
+
+export default async function transpileSwift (binaries: {[key: string]: string}) {
+
+    for (const [key, filePath] of Object.entries (binaries)) {
         const sourcesPath = `${filePath}/Sources/CCXT`;
         createSwiftTypes (`${sourcesPath}/CCXTTypes.swift`);
         createSwiftExchangeClasses (`${sourcesPath}/CCXTExchanges.swift`);
         createSwiftErrors (`${sourcesPath}/CCXTErrors.swift`);
         createWrapperFile (
             swiftMethodDeclaration,
+            swiftPropertyDeclaration,
             originalFiles.swiftExchange,
             `${sourcesPath}/CCXTExchange.swift`,
             undefined,
             key === 'pro',
         );
+        copyFileSync (originalFiles.swiftExample, `${sourcesPath}/Example.swift`);
         appendFileSync (`${filePath}/Sources/CCXT/CCXTExchange.swift`, `\n}\n`);
     }
 }
 
-transpileSwift ();
+const args = process.argv.slice(2);
+if (args.includes ('--pro')) {
+    transpileSwift ({'pro': swiftBinaries.pro});
+} else if (args.includes('--rest')) {
+    transpileSwift ({'rest': swiftBinaries.rest});
+} else {
+    transpileSwift (swiftBinaries);
+}

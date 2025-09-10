@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import ccxt from '../../../js/ccxt.js';
 import { capitalize, lowercaseFirstLetter, prefixWith } from './util.js';
-import { ccxtPaths, swiftBinaries, originalFiles } from './filepaths.js';
+import { ccxtPaths, binaries, originalFiles } from './filepaths.js';
 import { createGeneratedFile, createWrapperFile, customTypes, simpleTypes } from './shared.js';
 import { appendFileSync, copyFileSync } from 'fs';
 import { Property } from './types.js';
@@ -604,9 +604,9 @@ export default async function transpileSwift (binaries: {[key: string]: string})
 
 const args = process.argv.slice(2);
 if (args.includes ('--pro')) {
-    transpileSwift ({'pro': swiftBinaries.pro});
+    transpileSwift ({'pro': binaries.swift.pro});
 } else if (args.includes('--rest')) {
-    transpileSwift ({'rest': swiftBinaries.rest});
+    transpileSwift ({'rest': binaries.swift.rest});
 } else {
-    transpileSwift (swiftBinaries);
+    transpileSwift (binaries.swift);
 }

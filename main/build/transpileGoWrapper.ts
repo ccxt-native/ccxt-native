@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { swiftBinaries, originalFiles, androidBinaries, ccxtPaths, ccxtDir } from './filepaths';
+import { binaries, originalFiles, ccxtPaths, ccxtDir } from './filepaths';
 import { isArray, capitalize, prefixWith } from './util';
 import { createGeneratedFile, createWrapperFile, customTypes, allExchanges, wsExchanges, simpleTypes, getExchangeProperties, skippedProperties } from './shared';
 import { Property } from './types';
@@ -458,8 +458,8 @@ const goWsMap = () => {
 
 const inserts = (swift: boolean) => ({
     rest: {
-        goModStart: `module github.com/ccxt-native/swift
-go 1.24.4
+        goModStart: `module github.com/ccxt-native/ccxt-swift
+go 1.25.1
 
 require github.com/ccxt/ccxt/go/v4 v4.4.89
 
@@ -467,15 +467,15 @@ replace github.com/ccxt/ccxt/go/v4 => ../../go/v4
 `,
         imports: '   ccxt "github.com/ccxt/ccxt/go/v4"',
         library: 'ccxt',
-        binaryPath: swift ? swiftBinaries.rest : androidBinaries.rest,
+        binaryPath: swift ? binaries.swift.rest : binaries.android.rest,
         wsMap: '',
         instantiation: `
     var inst, ok = ccxt.DynamicallyCreateInstance(exchangeName, config)
 `,
     },
     pro: {
-        goModStart: `module github.com/ccxt-native/swift-pro
-go 1.24.4
+        goModStart: `module github.com/ccxt-native/ccxt-pro-swift
+go 1.25.1
 
 require github.com/ccxt/ccxt/go/v4 v4.4.89
 require github.com/ccxt/ccxt/go/v4/pro v0.0.0-20250806100000-000000000000
@@ -486,7 +486,7 @@ replace github.com/ccxt/ccxt/go/v4/pro => ../../go/v4/pro
         imports: `   ccxt "github.com/ccxt/ccxt/go/v4"
     ccxtPro "github.com/ccxt/ccxt/go/v4/pro"`,
         library: 'ccxtPro',
-        binaryPath: swift ? swiftBinaries.pro : androidBinaries.pro,
+        binaryPath: swift ? binaries.swift.pro : binaries.android.pro,
         wsMap: goWsMap (),
         instantiation: `
     var inst ccxt.ICoreExchange
@@ -570,7 +570,6 @@ function createGettersSetters () {
     const exchangeProperties = getExchangeProperties (
         new ccxt.Exchange (),
         ccxtPaths['exchange'],
-        'Exchange',
     ).filter (prop => (
         !methodsAlreadyInInterface.has (`Get${capitalize(prop.name)}`) &&
         !methodsAlreadyInInterface.has (`Set${capitalize(prop.name)}`)

@@ -365,7 +365,7 @@ export function createWrapperFile (
 ) {
 
     const headers = getTypescriptHeaders ();
-    const properties: Property[] = getExchangeProperties (new ccxt.Exchange(), ccxtPaths['exchange'], 'Exchange');
+    const properties: Property[] = getExchangeProperties (new ccxt.Exchange(), ccxtPaths['exchange']);
     const content: string[] = [];
     const skippedMethods = new Set<string> ([
         'fetchCurrenciesWs',
@@ -443,6 +443,7 @@ export async function bumpVersion (swift: boolean, pro: boolean) {
         return `v${major}.${minor}.${patch + 1}`;
     }    
 }
+
 
 export const customTypes = [  // Only those types that appear in swift headers
     'OrderRequest[]',

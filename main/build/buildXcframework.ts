@@ -1,6 +1,6 @@
 import { execSync } from "child_process";
-import { existsSync, mkdirSync, readFileSync, copyFileSync, writeFileSync } from "fs";
-import { swiftBinaries, ccxtNativeDir, gomobileHeader, licenseFile, originalFiles, originGoDir, readmeFiles, swiftTranspiler } from "./filepaths";
+import { existsSync, mkdirSync, readFileSync } from "fs";
+import { binaries, ccxtNativeDir, gomobileHeader, originalFiles, originGoDir, swiftTranspiler } from "./filepaths";
 import stripComments from "./stripComments";
 import { bumpVersion, createGeneratedFile } from "./shared";
 
@@ -28,15 +28,6 @@ function gomobileInit() {
     runCommand("go get golang.org/x/mobile/cmd/gomobile@latest");
     runCommand("go get golang.org/x/mobile/bind@latest");
     runCommand("gomobile init");
-}
-
-function combineMarkdownFiles(file1: string, file2: string, outputFile: string): void {
-    const content1 = readFileSync(file1, "utf-8");
-    const content2 = readFileSync(file2, "utf-8");
-  
-    const combined = `${content1.trim()}\n\n${content2.trim()}\n`;
-  
-    writeFileSync(outputFile, combined, "utf-8");
 }
 
 function stripAllBinaries(xcframeworkPath: string, frameworkName: string) {
@@ -128,7 +119,7 @@ async function resolveVersion(swift: boolean, isPro: boolean, packagePath: strin
     return "v0.0.1";
 }
 
-async function main(binaries: {[key: string]: string}) {
+export default async function main(binaries: {[key: string]: string}) {
 
     gomobileInit();
 
@@ -165,14 +156,12 @@ async function main(binaries: {[key: string]: string}) {
             [],
             originalFiles.swiftPackage,
             {
-                '\\[packageType\\]': (packageType === 'pro') ? 'swift-pro' : 'swift',
+                '\\[packageType\\]': (packageType === 'pro') ? 'ccxt-pro-swift' : 'ccxt-swift',
                 '\\[checksum\\]': checksum,
                 '\\[version\\]': version,
             },
             true,
         )
-        copyFileSync(licenseFile, `${packagePath}/LICENSE.txt`);
-        combineMarkdownFiles(readmeFiles.ccxtNative, readmeFiles.ccxt, `${packagePath}/README.md`);
 
         // Check for skipped methods only if the header file exists
         if (existsSync(gomobileHeader)) {
@@ -181,14 +170,14 @@ async function main(binaries: {[key: string]: string}) {
             console.log(`Warning: Header file not found at ${gomobileHeader}`);
         }
     }
+
 }
 
 const args = process.argv.slice(2);
 if (args.includes ('--pro')) {
-    main ({'pro': swiftBinaries.pro});
+    main ({'pro': binaries.swift.pro});
 } else if (args.includes('--rest')) {
-    main ({'rest': swiftBinaries.rest});
+    main ({'rest': binaries.swift.rest});
 } else {
-    main (swiftBinaries);
+    main (binaries.swift);
 }
-

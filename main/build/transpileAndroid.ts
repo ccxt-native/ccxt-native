@@ -1,5 +1,5 @@
 import { createWrapperFile } from "./shared";
-import { androidBinaries, originalFiles } from "./filepaths";
+import { binaries, originalFiles } from "./filepaths";
 import { Property } from "./types";
 
 function androidMethodDeclaration (
@@ -45,9 +45,9 @@ export default async function transpileAndroid (binaries: {[key: string]: string
 
 const args = process.argv.slice (2);
 if (args.includes ('--pro')) {
-    transpileAndroid ({'pro': androidBinaries.pro});
+    transpileAndroid ({'pro': binaries.android.pro});
 } else if (args.includes('--rest')) {
-    transpileAndroid ({'rest': androidBinaries.rest});
+    transpileAndroid ({'rest': binaries.android.rest});
 } else {
-    transpileAndroid (androidBinaries);
+    transpileAndroid (binaries.android);
 }

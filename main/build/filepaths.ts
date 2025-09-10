@@ -33,26 +33,37 @@ export const originalFiles = {
     gosum: `${originGoDir}/go.sum`,
 };
 
-export const swiftBinaries = {
-    rest: `${ccxtNativeDir}/ccxt-swift`,
-    pro: `${ccxtNativeDir}/ccxt-swift-pro`,
-    // intel: `${ccxtNativeDir}/swift-intel-simulator`,
-    // arm: `${ccxtNativeDir}/swift-arm-simulator`,
-    // intelPro: `${ccxtNativeDir}/pro/swift-intel-simulator`,
-    // armPro: `${ccxtNativeDir}/pro/swift-arm-simulator`,
-};
-
-export const androidBinaries = {
-    rest: `${ccxtNativeDir}/ccxt-android`,
-    pro: `${ccxtNativeDir}/ccxt-android-pro`,
+export const binaries = {
+    swift: {
+        rest: `${ccxtNativeDir}/ccxt-swift`,
+        pro: `${ccxtNativeDir}/ccxt-pro-swift`,
+        // intel: `${ccxtNativeDir}/swift-intel-simulator`,
+        // arm: `${ccxtNativeDir}/swift-arm-simulator`,
+        // intelPro: `${ccxtNativeDir}/pro/swift-intel-simulator`,
+        // armPro: `${ccxtNativeDir}/pro/swift-arm-simulator`,
+    },
+    android: {
+        rest: `${ccxtNativeDir}/ccxt-android`,
+        pro: `${ccxtNativeDir}/ccxt-pro-android`,
+    },
 }
 
-export const gomobileHeader = `${swiftBinaries.rest}/Sources/CCXTCore/CCXTCore.xcframework/ios-arm64/CCXTCore.framework/Headers/Ccxt.objc.h`;
+export const gomobileHeader = `${binaries.swift.rest}/Sources/CCXTCore/CCXTCore.xcframework/ios-arm64/CCXTCore.framework/Headers/Ccxt.objc.h`;
 
 export const readmeFiles = {
     ccxt: `${ccxtDir}/README.md`,
-    ccxtNative: `${ccxtNativeDir}/README.md`,
+    ccxtNative: `${ccxtNativeDir}/main/docs/README.md`,
+    swift: `${ccxtNativeDir}/main/docs/swift.md`,
+    android: `${ccxtNativeDir}/main/docs/android.md`,
 };
 
-
-
+export const repoUrls = {
+    swift: {
+        rest: 'https://github.com/ccxt-native/ccxt-swift.git',
+        pro: 'https://github.com/ccxt-native/ccxt-pro-swift.git',
+    },
+    android: {
+        rest: 'https://github.com/ccxt-native/ccxt-android.git',
+        pro: 'https://github.com/ccxt-native/ccxt-pro-android.git',
+    }
+};

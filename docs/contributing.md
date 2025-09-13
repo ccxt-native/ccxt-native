@@ -46,6 +46,8 @@ Changes may also be made to
 
 - package.json
 - .gitignore
+- docs
+- .github
 
 and will not be overwritten
 

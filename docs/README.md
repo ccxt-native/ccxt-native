@@ -2,6 +2,8 @@
 
 Swift and Android package for CCXT
 
+[Discord Support Channel](https://discord.gg/QWWq5CAQcG)
+
 This repo contains a **Go → C → Swift wrapper** around the [CCXT Go library](https://github.com/ccxt/ccxt/tree/master/go/v4), 
 designed for use in **iOS**, **macOS** and **android**(soon) apps
 

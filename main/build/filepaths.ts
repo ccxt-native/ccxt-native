@@ -52,9 +52,9 @@ export const gomobileHeader = `${binaries.swift.rest}/Sources/CCXTCore/CCXTCore.
 
 export const readmeFiles = {
     ccxt: `${ccxtDir}/README.md`,
-    ccxtNative: `${ccxtNativeDir}/main/docs/README.md`,
-    swift: `${ccxtNativeDir}/main/docs/swift.md`,
-    android: `${ccxtNativeDir}/main/docs/android.md`,
+    ccxtNative: `${ccxtNativeDir}/docs/README.md`,
+    swift: `${ccxtNativeDir}/docs/swift.md`,
+    android: `${ccxtNativeDir}/docs/android.md`,
 };
 
 export const repoUrls = {

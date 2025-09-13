@@ -2,6 +2,8 @@
 
 Swift and Android package for CCXT
 
+[Discord Support Channel](https://discord.gg/QWWq5CAQcG)
+
 This repo contains a **Go → C → Swift wrapper** around the [CCXT Go library](https://github.com/ccxt/ccxt/tree/master/go/v4), 
 designed for use in **iOS**, **macOS** and **android**(soon) apps
 
@@ -32,6 +34,19 @@ Then select "Add To Target" and select your project
 
 ![img showing Add To Target](./docs/imgs/add-to-target.png)
 
+### Signing and Capabilities
+
+You will need to select the box under
+
+    Signing and Capabilities > App Sandbox > Outgoing Connections (Client)
+
+or else you will receive an error that starts with
+
+```
+Network error: Get \"https://api.binance.com/api/v2/spot/public/symbols\": dial tcp: lookup api.binance.com: no such host]\nStack:\n\nStack trace:\ngoroutine 44 [running]:\nruntime/debug.Stack()\n\t/opt/homebrew/Cellar/go/1.24.5/libexec/src/runtime/debug/stack.go:26 +0x64\ngithub.com/ccxt/ccxt/go/v4.PanicOnError({0x109a6d220, 0x140004361f0})\n\t
+```
+
+![img showing Outgoing Connections Client](./docs/imgs/outgoing-connections-client.png)
 
 ## Using CCXT
 

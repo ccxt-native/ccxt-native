@@ -30,17 +30,17 @@ From the Xcode menu, select
 
     File > Add Package Dependencies
 
-![img showing File > Add Package Dependencies](./docs/imgs/file-add-package-dependencies.png)
+![./docs/imgs/swift/file-add-package-dependencies.png](./docs/imgs/swift/file-add-package-dependencies.png)
 
 And in the search bar in the top right, enter https://github.com/ccxt-native/ccxt-pro-swift.git
 
-![img showing File > Add Package Dependencies](./docs/imgs/add-ccxt-swift.png)
+![./docs/imgs/swift/add-ccxt-swift.png](./docs/imgs/swift/add-ccxt-swift.png)
 
 And click "Add Package" in the bottom right
 
 Then select "Add To Target" and select your project
 
-![img showing Add To Target](./docs/imgs/add-to-target.png)
+![./docs/imgs/swift/add-to-target.png](./docs/imgs/swift/add-to-target.png)
 
 ### Signing and Capabilities
 
@@ -54,7 +54,7 @@ or else you will receive an error that starts with
 Network error: Get \"https://api.binance.com/api/v2/spot/public/symbols\": dial tcp: lookup api.binance.com: no such host]\nStack:\n\nStack trace:\ngoroutine 44 [running]:\nruntime/debug.Stack()\n\t/opt/homebrew/Cellar/go/1.24.5/libexec/src/runtime/debug/stack.go:26 +0x64\ngithub.com/ccxt/ccxt/go/v4.PanicOnError({0x109a6d220, 0x140004361f0})\n\t
 ```
 
-![img showing Outgoing Connections Client](./docs/imgs/outgoing-connections-client.png)
+![./docs/imgs/swift/outgoing-connections-client.png](./docs/imgs/swift/outgoing-connections-client.png)
 
 ## Using CCXT
 
